@@ -81,7 +81,7 @@ type Service struct {
 	// Optional 'parsers' config file (can be multiple)
 	ParsersFile string `json:"parsersFile,omitempty"`
 	// If true enable reload
-	EnableHotReload *bool `json:"enableHotReload,omitempty"`
+	HotReload *bool `json:"HotReload,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -151,8 +151,8 @@ func (s *Service) Params() *params.KVs {
 	if s.ParsersFile != "" {
 		m.Insert("Parsers_File", s.ParsersFile)
 	}
-	if s.EnableHotReload != nil {
-		m.Insert("Enable_Hot_Reload",fmt.Sprint(*s.EnableHotReload))
+	if s.HotReload != nil {
+		m.Insert("Hot_Reload",fmt.Sprint(*s.HotReload))
 	}
 	return m
 }

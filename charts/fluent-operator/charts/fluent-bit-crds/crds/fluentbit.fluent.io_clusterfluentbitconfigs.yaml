@@ -224,11 +224,11 @@ spec:
                 description: Service defines the global behaviour of the Fluent Bit
                   engine.
                 properties:
+                  HotReload:
+                    description: If true enable reload
+                    type: boolean
                   daemon:
                     description: If true go to background on start
-                    type: boolean
-                  enableHotReload:
-                    description: If true enable reload
                     type: boolean
                   flushSeconds:
                     description: Interval to flush output
