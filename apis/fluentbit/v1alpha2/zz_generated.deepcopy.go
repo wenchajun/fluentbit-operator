@@ -1486,8 +1486,8 @@ func (in *Service) DeepCopyInto(out *Service) {
 		*out = new(bool)
 		**out = **in
 	}
-	if in.EnableHotReload != nil {
-		in, out := &in.EnableHotReload, &out.EnableHotReload
+	if in.HotReload != nil {
+		in, out := &in.HotReload, &out.HotReload
 		*out = new(bool)
 		**out = **in
 	}
