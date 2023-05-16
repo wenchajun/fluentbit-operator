@@ -102,7 +102,7 @@ func main() {
 			},
 			func(err error) {
 				close(cancel)
-				stop()
+				reloadOrStop()
 				resetTimer()
 			},
 		)
@@ -138,7 +138,7 @@ func main() {
 						// and resets the restart backoff timer.
 						if cmd != nil {
 							_ = level.Info(logger).Log("msg", "Config file changed, stopping Fluent Bit")
-							stop()
+							reloadOrStop()
 							resetTimer()
 							_ = level.Info(logger).Log("msg", "Config file changed, stopped Fluent Bit")
 						}
@@ -193,9 +193,9 @@ func start() {
 	}
 
 	if externalPluginPath != "" {
-		cmd = exec.Command(binPath, "-c", configPath, "-e", externalPluginPath)
+		cmd = exec.Command(binPath, "-c", configPath, "-e", externalPluginPath,"-Y")
 	} else {
-		cmd = exec.Command(binPath, "-c", configPath)
+		cmd = exec.Command(binPath, "-c", configPath,"-Y")
 	}
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -265,7 +265,7 @@ func backoff() {
 	}
 }
 
-func stop() {
+func reloadOrStop() {
 
 	mutex.Lock()
 	defer mutex.Unlock()
@@ -275,8 +275,8 @@ func stop() {
 		return
 	}
 
-	// Send SIGTERM, if fluent-bit doesn't terminate in the specified timeframe, send SIGKILL
-	if err := cmd.Process.Signal(syscall.SIGTERM); err != nil {
+	// Send SIGHUP, if fluent-bit doesn't terminate in the specified timeframe, send SIGKILL
+	if err := cmd.Process.Signal(syscall.SIGHUP); err != nil {
 		_ = level.Info(logger).Log("msg", "Error while terminating FluentBit", "error", err)
 	} else {
 		_ = level.Info(logger).Log("msg", "Sent SIGTERM to FluentBit, waiting max "+flbTerminationTimeout.String())
