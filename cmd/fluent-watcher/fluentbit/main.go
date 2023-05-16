@@ -32,7 +32,6 @@ const (
 var (
 	logger        log.Logger
 	cmd           *exec.Cmd
-	flbTerminated chan bool
 	mutex         sync.Mutex
 	restartTimes  int32
 	timerCtx      context.Context
@@ -199,7 +198,6 @@ func start() {
 	}
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	flbTerminated = make(chan bool, 1)
 	if err := cmd.Start(); err != nil {
 		_ = level.Error(logger).Log("msg", "start Fluent bit error", "error", err)
 		cmd = nil
@@ -223,9 +221,9 @@ func wait() error {
 	if err != nil {
 		_ = level.Error(logger).Log("msg", "Fluent bit exited", "error", err)
 	}
+	mutex.Lock()
 	cmd = nil
-	flbTerminated <- true
-
+	mutex.Unlock()
 	// Once the fluent bit has executed for 10 minutes without any problems,
 	// it should resets the restart backoff timer.
 	if time.Since(startTime) >= ResetTime {
@@ -286,9 +284,6 @@ func reloadOrStop() {
 	case <-time.After(flbTerminationTimeout):
 		_ = level.Info(logger).Log("msg", "FluentBit failed to terminate gracefully, killing process")
 		cmd.Process.Kill()
-		<-flbTerminated
-	case <-flbTerminated:
-		_ = level.Info(logger).Log("msg", "FluentBit terminated successfully")
 	}
 }
 
