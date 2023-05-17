@@ -276,15 +276,16 @@ func reloadOrStop() {
 	// Send SIGHUP, if fluent-bit doesn't terminate in the specified timeframe, send SIGKILL
 	if err := cmd.Process.Signal(syscall.SIGHUP); err != nil {
 		_ = level.Info(logger).Log("msg", "Error while terminating FluentBit", "error", err)
+		cmd.Process.Kill()
 	} else {
 		_ = level.Info(logger).Log("msg", "Sent SIGTERM to FluentBit, waiting max "+flbTerminationTimeout.String())
 	}
 
-	select {
-	case <-time.After(flbTerminationTimeout):
-		_ = level.Info(logger).Log("msg", "FluentBit failed to terminate gracefully, killing process")
-		cmd.Process.Kill()
-	}
+	//select {
+	//case <-time.After(flbTerminationTimeout):
+	//	_ = level.Info(logger).Log("msg", "FluentBit failed to terminate gracefully, killing process")
+	//	cmd.Process.Kill()
+	//}
 }
 
 func resetTimer() {
